@@ -1,11 +1,16 @@
 const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Static files serve change
 app.use(express.static(__dirname + "/.."));
+
+// Root  index.html serve 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../index.html'));
 });
@@ -13,8 +18,8 @@ app.get('/', (req, res) => {
 // MySQL connection
 const db = mysql.createConnection({
   host: "localhost",
-  user: "root",                 //MySQL username 
-  password: "miramysql@2006",   //  password 
+  user: "root",
+  password: "miramysql@2006",
   database: "gs_fashion"
 });
 
@@ -27,9 +32,7 @@ db.connect(err => {
   console.log(" Connected to MySQL Database!");
 });
 
-// ROUTES 
-
-//  Get all products
+// ROUTES
 app.get("/products", (req, res) => {
   db.query("SELECT * FROM products", (err, results) => {
     if (err) return res.status(500).json({ error: err });
@@ -37,7 +40,6 @@ app.get("/products", (req, res) => {
   });
 });
 
-//  Get single product
 app.get("/products/:id", (req, res) => {
   const { id } = req.params;
   db.query("SELECT * FROM products WHERE id = ?", [id], (err, results) => {
@@ -46,7 +48,6 @@ app.get("/products/:id", (req, res) => {
   });
 });
 
-//  Add new product
 app.post("/products", (req, res) => {
   const { name, category, image, sizes, in_stock, description } = req.body;
   const query =
@@ -65,7 +66,6 @@ app.post("/products", (req, res) => {
   });
 });
 
-//  Update product
 app.put("/products/:id", (req, res) => {
   const { id } = req.params;
   const { name, category, image, sizes, in_stock, description } = req.body;
@@ -77,7 +77,6 @@ app.put("/products/:id", (req, res) => {
   });
 });
 
-// Delete product
 app.delete("/products/:id", (req, res) => {
   const { id } = req.params;
   db.query("DELETE FROM products WHERE id=?", [id], (err) => {
