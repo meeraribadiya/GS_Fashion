@@ -357,7 +357,7 @@
     }
 
     #preloader img {
-      width: 120px;
+      width: 200px;
       animation: pulse 1.2s infinite;
     }
 
@@ -522,19 +522,20 @@
   </div>
 
 
-  </section>
+
 
   <footer>&copy; 2025 GS Fashion. All rights reserved.</footer>
   <script>
     const WA_NUMBER = "918140224241";
 
-    // API se products fetch karo
+    // API products fetch
     async function loadCatalog() {
       try {
-        const res = await fetch("http://localhost:5000/products");
+        const res = await fetch("http://192.168.1.11:5000/products");
+
         const products = await res.json();
 
-        // Har category ke hisaab se render
+      
         document.getElementById('kurtisCatalog').innerHTML =
           products.filter(p => p.category === "kurti").map(createCard).join('');
 
@@ -549,7 +550,8 @@
     }
 
     function createCard(prod) {
-      let imgPath = "images/" + encodeURIComponent(prod.image);
+     let imgPath = "/images/" + encodeURIComponent(prod.image);
+
       const waMsg = encodeURIComponent(
         `Hi GS Fashion, I'm interested in this design: ${prod.name}`
       );

@@ -7,12 +7,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Static files serve change
-app.use(express.static(__dirname + "/.."));
+// Static files serve (CSS, JS, etc.)
+app.use(express.static(path.join(__dirname, "..")));
+
+// Serve images folder
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 // Root  index.html serve 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../index.html'));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../index.html"));
 });
 
 // MySQL connection
