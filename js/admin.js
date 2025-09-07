@@ -1,3 +1,4 @@
+
 // Simple Admin Panel for GS Fashion
 const adminPanel = {
   products: [],
@@ -144,13 +145,8 @@ const adminPanel = {
         <td>${index + 1}</td>
         <td>
           <div class="d-flex align-items-center">
-            <div class="position-relative" style="width: 60px; height: 60px; overflow: hidden; border-radius: 4px; background: #f8f9fa;">
-              <img src="images/${product.image || 'placeholder.svg'}" alt="${product.name}" 
-                   class="product-img w-100 h-100 object-fit-cover" 
-                   onerror="this.src='images/placeholder.svg'"
-                   onload="this.style.opacity = '1'"
-                   style="opacity: 0; transition: opacity 0.3s ease;">
-            </div>
+            <img src="images/${product.image || 'placeholder.svg'}" alt="${product.name}" 
+                 class="product-img me-3" onerror="this.src='images/placeholder.svg'">
             <div>
               <div class="fw-bold">${product.name}</div>
               <small class="text-muted">${product.material || 'No material specified'}</small>
@@ -263,7 +259,7 @@ const adminPanel = {
     }
   },
   
-  // Handle form submission with image upload and validation
+  // Handle form submission
   handleFormSubmit: async function(e) {
     e.preventDefault();
     const form = e.target;
@@ -275,93 +271,50 @@ const adminPanel = {
       submitBtn.disabled = true;
       spinner.classList.remove('d-none');
       
-      // Basic form validation
-      const name = form.elements['name']?.value?.trim();
-      const price = parseFloat(form.elements['price']?.value);
-      
-      if (!name) {
-        throw new Error('Product name is required');
-      }
-      
-      if (isNaN(price) || price < 0) {
-        throw new Error('Please enter a valid price');
-      }
-      
+      // Get all form data
       const formData = new FormData(form);
       const sizes = Array.from(formData.getAll('sizes[]'));
       
-      // Prepare product data with validation
+      // Create product data object
       const productData = {
-        name: name,
+        name: formData.get('name') || '',
         category: formData.get('category') || 'kurti',
-        price: price,
+        price: parseFloat(formData.get('price')) || 0,
         material: formData.get('material') || '',
-        sizes: sizes.length > 0 ? sizes : ['M'],
+        sizes: sizes.length > 0 ? sizes : ['M'], // Default to M if no size selected
         in_stock: formData.get('in_stock') === 'on',
         description: formData.get('description') || ''
       };
       
-      // Handle image upload with validation
+      // Handle image upload if a new file is selected
       const imageFile = formData.get('image');
       if (imageFile && imageFile.size > 0) {
-        // Validate image file type and size (max 2MB)
-        const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-        const maxSize = 2 * 1024 * 1024; // 2MB
-        
-        if (!validTypes.includes(imageFile.type)) {
-          throw new Error('Invalid image type. Please upload a JPEG, PNG, or WebP image.');
-        }
-        
-        if (imageFile.size > maxSize) {
-          throw new Error('Image size should be less than 2MB');
-        }
-        
-        try {
-          // Add image file to FormData for upload
-          const uploadFormData = new FormData();
-          uploadFormData.append('image', imageFile);
-          
-          // Show upload progress
-          this.showNotification('Uploading image...', 'info');
-          
-          // Upload image to server
-          const uploadResponse = await fetch('/api/upload', {
-            method: 'POST',
-            body: uploadFormData
-          });
-          
-          if (!uploadResponse.ok) {
-            const errorData = await uploadResponse.json().catch(() => ({}));
-            throw new Error(errorData.message || 'Image upload failed');
-          }
-          
-          const { filename } = await uploadResponse.json();
-          productData.image = filename;
-          
-        } catch (uploadError) {
-          console.error('Upload error:', uploadError);
-          throw new Error(`Image upload failed: ${uploadError.message}`);
-        }
+        // In a real app, you would upload the file to a server here
+        // For now, we'll just use the file name
+        productData.image = imageFile.name;
       } else if (this.currentProduct) {
-        // Keep existing image if editing and no new image was uploaded
+        // Keep the existing image if editing and no new image was uploaded
         productData.image = this.currentProduct.image || '';
-      } else {
-        // For new products without an image
-        productData.image = 'placeholder.jpg';
       }
       
       let response;
       const isEdit = !!this.currentProduct;
-      const url = isEdit 
-        ? `http://localhost:5000/products/${this.currentProduct.id}`
-        : 'http://localhost:5000/products';
       
-      // Send product data to server
-      response = await fetch(url, {
-        method: isEdit ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(productData)
-      });
+      if (isEdit) {
+        // Update existing product
+        response = await fetch(`http://localhost:5000/products/${this.currentProduct.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(productData)
+        });
+      } else {
+        // Add new product
+        response = await fetch('http://localhost:5000/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(productData)
+        });
+      }
       
       if (!response.ok) throw new Error('Failed to save product');
       
@@ -416,50 +369,37 @@ const adminPanel = {
     }
   },
   
-  // Show notification toast with enhanced error handling
-  showNotification: function(message, type = 'info', details = '') {
-    try {
-      const toastContainer = document.getElementById('toastContainer') || document.body;
-      
-      // Create toast element
-      const toast = document.createElement('div');
-      toast.className = `toast align-items-center text-white bg-${type} border-0`;
-      toast.role = 'alert';
-      toast.setAttribute('aria-live', 'assertive');
-      toast.setAttribute('aria-atomic', 'true');
-      
-      // Create toast content
-      toast.innerHTML = `
-        <div class="d-flex">
-          <div class="toast-body">
-            <strong>${message}</strong>
-            ${details ? `<div class="small mt-1">${details}</div>` : ''}
-          </div>
-          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-      `;
-      
-      // Add to container
-      toastContainer.appendChild(toast);
-      
-      // Initialize and show toast
-      const bsToast = new bootstrap.Toast(toast, { 
-        autohide: true, 
-        delay: type === 'error' ? 5000 : 3000 
-      });
-      
-      // Remove toast after it's hidden
-      toast.addEventListener('hidden.bs.toast', () => {
-        toast.remove();
-      });
-      
-      bsToast.show();
-      
-    } catch (error) {
-      console.error('Error showing notification:', error);
-      // Fallback to alert if toast system fails
-      alert(`${type.toUpperCase()}: ${message}${details ? '\n\n' + details : ''}`);
+  // Show notification toast
+  showNotification: function(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    const toastBody = toast.querySelector('.toast-body');
+    
+    // Set message and style based on type
+    toastBody.textContent = message;
+    
+    // Remove all type classes and add the new one
+    ['bg-primary', 'bg-success', 'bg-danger', 'bg-warning'].forEach(cls => {
+      toast.classList.remove(cls);
+    });
+    
+    switch(type) {
+      case 'success':
+        toast.classList.add('bg-success');
+        break;
+      case 'error':
+        toast.classList.add('bg-danger');
+        break;
+      case 'warning':
+        toast.classList.add('bg-warning');
+        break;
+      case 'info':
+      default:
+        toast.classList.add('bg-primary');
     }
+    
+    // Show the toast
+    const bsToast = new bootstrap.Toast(toast, { autohide: true, delay: 3000 });
+    bsToast.show();
   },
   
   // Set up event listeners
@@ -508,7 +448,6 @@ const adminPanel = {
     }
   }
 };
-
 // Initialize the admin panel when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
   adminPanel.init();
