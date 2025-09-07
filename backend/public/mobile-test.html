@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mobile Image Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+    .test-box {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background: #f9f9f9;
+    }
+    .test-image {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 10px 0;
+      border: 2px solid #4CAF50;
+      border-radius: 4px;
+    }
+    .status {
+      padding: 5px 10px;
+      border-radius: 3px;
+      font-weight: bold;
+      margin-top: 10px;
+      display: inline-block;
+    }
+    .success { background: #dff0d8; color: #3c763d; }
+    .error { background: #f2dede; color: #a94442; }
+    .loading { background: #d9edf7; color: #31708f; }
+  </style>
+</head>
+<body>
+  <h1>Mobile Image Test</h1>
+  <p>This page tests if images load correctly on mobile devices.</p>
+  
+  <div class="test-box">
+    <h3>Test 1: Direct Image</h3>
+    <img id="test1" class="test-image" src="/images/gslogo.jpg" 
+         alt="GS Logo" 
+         onload="document.getElementById('status1').className='status success'; document.getElementById('status1').textContent='✅ Loaded successfully'"
+         onerror="document.getElementById('status1').className='status error'; document.getElementById('status1').textContent='❌ Failed to load' + (this.src.includes('?') ? ' (with cache buster)' : '')">
+    <div id="status1" class="status loading">Loading...</div>
+    <p>Path: /images/gslogo.jpg</p>
+  </div>
+  
+  <div class="test-box">
+    <h3>Test 2: Image with Cache Buster</h3>
+    <img id="test2" class="test-image" 
+         src="/images/gslogo.jpg?_t=" + new Date().getTime() 
+         alt="GS Logo with Cache Buster"
+         onload="document.getElementById('status2').className='status success'; document.getElementById('status2').textContent='✅ Loaded successfully'"
+         onerror="document.getElementById('status2').className='status error'; document.getElementById('status2').textContent='❌ Failed to load' + (this.src.includes('?') ? ' (with cache buster)' : '')">
+    <div id="status2" class="status loading">Loading...</div>
+    <p>Path: /images/gslogo.jpg?_t=[timestamp]</p>
+  </div>
+  
+  <div class="test-box">
+    <h3>Test 3: Product Image</h3>
+    <img id="test3" class="test-image" 
+         src="/images/kurti1.jpg" 
+         alt="Product Image"
+         onload="document.getElementById('status3').className='status success'; document.getElementById('status3').textContent='✅ Loaded successfully'"
+         onerror="document.getElementById('status3').className='status error'; document.getElementById('status3').textContent='❌ Failed to load' + (this.src.includes('?') ? ' (with cache buster)' : '')">
+    <div id="status3" class="status loading">Loading...</div>
+    <p>Path: /images/kurti1.jpg</p>
+  </div>
+  
+  <div class="test-box">
+    <h3>Test 4: Non-existent Image (Should Show Error)</h3>
+    <img id="test4" class="test-image" 
+         src="/images/non-existent.jpg" 
+         alt="Non-existent Image"
+         onload="document.getElementById('status4').className='status success'; document.getElementById('status4').textContent='✅ Loaded successfully'"
+         onerror="document.getElementById('status4').className='status error'; document.getElementById('status4').textContent='❌ Failed to load (expected, this is a test)'">
+    <div id="status4" class="status loading">Loading...</div>
+    <p>Path: /images/non-existent.jpg</p>
+  </div>
+  
+  <div class="test-box">
+    <h3>Test 5: Image via JavaScript</h3>
+    <div id="js-image-container"></div>
+    <div id="status5" class="status loading">Loading via JavaScript...</div>
+  </div>
+  
+  <script>
+    // Test loading an image via JavaScript
+    const img = new Image();
+    img.onload = function() {
+      document.getElementById('js-image-container').appendChild(img);
+      const status = document.getElementById('status5');
+      status.className = 'status success';
+      status.textContent = '✅ Loaded successfully via JavaScript';
+    };
+    img.onerror = function() {
+      const status = document.getElementById('status5');
+      status.className = 'status error';
+      status.textContent = '❌ Failed to load via JavaScript';
+    };
+    img.src = '/images/kurti1.jpg';
+    img.alt = 'JavaScript Loaded Image';
+    img.className = 'test-image';
+    
+    // Log all image loading events
+    document.querySelectorAll('img').forEach(img => {
+      img.addEventListener('load', () => console.log('Image loaded:', img.src));
+      img.addEventListener('error', (e) => console.error('Error loading image:', img.src, e));
+    });
+  </script>
+</body>
+</html>

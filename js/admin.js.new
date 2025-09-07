@@ -1,0 +1,281 @@
+// Admin Panel JavaScript
+const adminPanel = {
+  products: [],
+  currentProduct: null,
+  
+  // Initialize the admin panel
+  init: function() {
+    this.loadProducts();
+    this.setupEventListeners();
+  },
+  
+  // Load products from the server
+  loadProducts: async function() {
+    try {
+      const response = await fetch('http://localhost:5000/products');
+      this.products = await response.json();
+      this.renderProductList();
+      this.updateStats();
+    } catch (error) {
+      console.error('Error loading products:', error);
+      this.showNotification('Error loading products', 'error');
+    }
+  },
+  
+  // Update statistics
+  updateStats: function() {
+    const totalProducts = this.products.length;
+    const inStockCount = this.products.filter(p => p.in_stock).length;
+    const outOfStockCount = totalProducts - inStockCount;
+    
+    document.getElementById('totalProducts').textContent = totalProducts;
+    document.getElementById('inStockCount').textContent = inStockCount;
+    document.getElementById('outOfStockCount').textContent = outOfStockCount;
+  },
+  
+  // Render product list in admin panel
+  renderProductList: function() {
+    const productList = document.getElementById('productList');
+    if (!productList) return;
+
+    if (this.products.length === 0) {
+      productList.innerHTML = `
+        <tr>
+          <td colspan="7" class="text-center py-5">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <p class="mb-0">No products found</p>
+            <button class="btn btn-primary mt-3" onclick="adminPanel.showAddForm()">
+              <i class="fas fa-plus me-2"></i>Add Your First Product
+            </button>
+          </td>
+        </tr>`;
+      return;
+    }
+    
+    productList.innerHTML = this.products.map((product, index) => `
+      <tr>
+        <td>${index + 1}</td>
+        <td>
+          <div class="d-flex align-items-center">
+            <img src="images/${product.image || 'placeholder.svg'}" alt="${product.name}" class="product-img me-3" onerror="this.src='images/placeholder.svg'">
+            <div>
+              <div class="fw-bold">${product.name}</div>
+              <small class="text-muted">ID: ${product.id}</small>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span class="badge bg-light text-dark text-capitalize">${product.category}</span>
+        </td>
+        <td>₹${parseFloat(product.price || 0).toFixed(2)}</td>
+        <td>
+          ${product.in_stock 
+            ? '<span class="badge bg-success">In Stock</span>' 
+            : '<span class="badge bg-danger">Out of Stock</span>'}
+        </td>
+        <td>${new Date().toLocaleDateString()}</td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-outline-primary me-1" onclick="adminPanel.editProduct(${product.id})" data-bs-toggle="tooltip" title="Edit">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger" onclick="adminPanel.confirmDelete(${product.id})" data-bs-toggle="tooltip" title="Delete">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      </tr>`).join('');
+    
+    // Re-initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function(tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  },
+  
+  // Show add product form
+  showAddForm: function() {
+    this.currentProduct = null;
+    const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
+    const form = document.getElementById('addProductForm');
+    form.reset();
+    form.querySelector('input[name="name"]').focus();
+    modal.show();
+  },
+  
+  // Edit product
+  editProduct: async function(productId) {
+    try {
+      const response = await fetch(`http://localhost:5000/products/${productId}`);
+      this.currentProduct = await response.json();
+      
+      const form = document.getElementById('addProductForm');
+      form.elements['name'].value = this.currentProduct.name;
+      form.elements['category'].value = this.currentProduct.category;
+      form.elements['price'].value = this.currentProduct.price;
+      form.elements['in_stock'].checked = this.currentProduct.in_stock;
+      form.elements['description'].value = this.currentProduct.description || '';
+      
+      const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
+      modal._element.querySelector('.modal-title').textContent = 'Edit Product';
+      modal.show();
+    } catch (error) {
+      console.error('Error loading product:', error);
+      this.showNotification('Error loading product details', 'error');
+    }
+  },
+  
+  // Handle form submission
+  handleFormSubmit: async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const spinner = submitBtn.querySelector('.spinner-border');
+    
+    try {
+      // Show loading state
+      submitBtn.disabled = true;
+      spinner.classList.remove('d-none');
+      
+      const formData = new FormData(form);
+      const productData = {
+        name: formData.get('name'),
+        category: formData.get('category'),
+        price: parseFloat(formData.get('price')) || 0,
+        sizes: Array.from(formData.getAll('sizes[]')).join(','),
+        in_stock: formData.get('in_stock') === 'on',
+        description: formData.get('description'),
+        image: formData.get('image')?.name || ''
+      };
+      
+      let response;
+      if (this.currentProduct) {
+        // Update existing product
+        response = await fetch(`http://localhost:5000/products/${this.currentProduct.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(productData)
+        });
+      } else {
+        // Add new product
+        response = await fetch('http://localhost:5000/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(productData)
+        });
+      }
+      
+      if (!response.ok) throw new Error('Failed to save product');
+      
+      const result = await response.json();
+      
+      // Update UI
+      if (this.currentProduct) {
+        const index = this.products.findIndex(p => p.id === this.currentProduct.id);
+        if (index !== -1) this.products[index] = result;
+      } else {
+        this.products.unshift(result);
+      }
+      
+      this.renderProductList();
+      this.updateStats();
+      
+      // Close modal and show success message
+      bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+      this.showNotification(`Product ${this.currentProduct ? 'updated' : 'added'} successfully`, 'success');
+      
+    } catch (error) {
+      console.error('Error saving product:', error);
+      this.showNotification('Error saving product', 'error');
+    } finally {
+      submitBtn.disabled = false;
+      spinner.classList.add('d-none');
+    }
+  },
+  
+  // Confirm before deleting
+  confirmDelete: function(productId) {
+    this.currentProduct = this.products.find(p => p.id == productId);
+    if (!this.currentProduct) return;
+    
+    const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    modal.show();
+  },
+  
+  // Delete product
+  deleteProduct: async function() {
+    if (!this.currentProduct) return;
+    
+    try {
+      const response = await fetch(`http://localhost:5000/products/${this.currentProduct.id}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) throw new Error('Failed to delete product');
+      
+      // Update UI
+      this.products = this.products.filter(p => p.id !== this.currentProduct.id);
+      this.renderProductList();
+      this.updateStats();
+      
+      // Close modal and show success message
+      bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
+      this.showNotification('Product deleted successfully', 'success');
+      
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      this.showNotification('Error deleting product', 'error');
+    }
+  },
+  
+  // Show notification toast
+  showNotification: function(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    const toastBody = toast.querySelector('.toast-body');
+    
+    // Set message and style based on type
+    toastBody.textContent = message;
+    
+    // Remove all type classes and add the new one
+    ['bg-primary', 'bg-success', 'bg-danger', 'bg-warning', 'bg-info'].forEach(cls => {
+      toast.classList.remove(cls);
+    });
+    
+    switch(type) {
+      case 'success':
+        toast.classList.add('bg-success');
+        break;
+      case 'error':
+        toast.classList.add('bg-danger');
+        break;
+      case 'warning':
+        toast.classList.add('bg-warning');
+        break;
+      case 'info':
+      default:
+        toast.classList.add('bg-primary');
+    }
+    
+    // Show the toast
+    const bsToast = new bootstrap.Toast(toast, { autohide: true, delay: 3000 });
+    bsToast.show();
+  },
+  
+  // Set up event listeners
+  setupEventListeners: function() {
+    // Add/Edit product form submission
+    const productForm = document.getElementById('addProductForm');
+    if (productForm) {
+      productForm.addEventListener('submit', (e) => this.handleFormSubmit(e));
+    }
+    
+    // Delete confirmation
+    const deleteBtn = document.querySelector('#deleteConfirmModal .btn-danger');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', () => this.deleteProduct());
+    }
+  }
+};
+
+// Initialize the admin panel when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+  adminPanel.init();
+});

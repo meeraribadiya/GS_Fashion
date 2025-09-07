@@ -1,12 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GS Fashion</title>
-
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css" />
-
   <style>
     html {
       scroll-behavior: smooth;
@@ -30,6 +29,44 @@
       padding: 0;
       min-height: 100vh;
     }
+    /* Error State */
+    
+    #errorMessage {
+      background: #ffebee;
+      color: #c62828;
+      padding: 1rem;
+      margin: 1rem;
+      border-radius: 4px;
+      text-align: center;
+      display: none;
+    }
+    
+    
+    .product-img-box {
+      position: relative;
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f9f9f9;
+    }
+    
+    .product-img-box img {
+      max-width: 100%;
+      height: auto;
+      transition: opacity 0.3s ease;
+    }
+    
+    .product-img-box img[src*='placeholder.jpg'] {
+      opacity: 0.6;
+    }
+    
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
     /*  Contact Bar */
     .contact-bar {
       background: var(--dark);
@@ -367,7 +404,6 @@
         transform: translateX(-400%);
       }
     }
-
     /* Animation */
     @keyframes zoomIn {
       from {
@@ -428,7 +464,6 @@
       <!-- Pagination -->
       <div class="swiper-pagination"></div>
     </div>
-
   </header>
   <!--  Product Sections -->
   <div id="kurtis">
@@ -439,61 +474,116 @@
     <div class="section-title">Tunics Collection</div>
     <div class="product-catalog" id="tunicsCatalog"></div>
   </div>
-  <div id="tops">
-    <div class="section-title">Tops Collection</div>
-    <div class="product-catalog" id="topsCatalog"></div>
+  <section id="tops" class="catalog-section">
+    <h2>Tops Collection</h2>
+    <div id="topsCatalog" class="catalog-grid">
+      <!-- Tops will be loaded here -->
+    </div>
+  </section>
+  
+  <!-- Loading and Error States -->
+  <div id="loadingIndicator">
+    <div class="loading-spinner"></div>
+    <p>Loading products...</p>
   </div>
+  
+  <div id="errorMessage"></div>
   <!--  Modal -->
   <div class="modal" id="modal">
     <img id="modal-img" src="#" alt="Product Image" />
     <div class="modal-close" id="modal-close">&times;</div>
   </div>
-
   </section>
   <footer>&copy; 2025 GS Fashion. All rights reserved.</footer>
   <script>
     const WA_NUMBER = "918140224241";
-    // API products fetch
-    async function loadCatalog() {
-      try {
-        const res = await fetch("http://localhost:5000/products");
-        const products = await res.json();
-      
-        document.getElementById('kurtisCatalog').innerHTML =
-          products.filter(p => p.category === "kurti").map(createCard).join('');
-        document.getElementById('tunicsCatalog').innerHTML =
-          products.filter(p => p.category === "tunic").map(createCard).join('');
-        document.getElementById('topsCatalog').innerHTML =
-          products.filter(p => p.category === "top").map(createCard).join('');
-      } catch (err) {
-        console.error("Error loading products:", err);
+    // API products fetch with retry logic
+    async function fetchWithRetry(url, options = {}, retries = 3) {
+      for (let i = 0; i < retries; i++) {
+        try {
+          const response = await fetch(url, options);
+          if (response.ok) return await response.json();
+          throw new Error(`HTTP error! status: ${response.status}`);
+        } catch (error) {
+          if (i === retries - 1) throw error;
+          await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+        }
       }
     }
+    async function loadCatalog() {
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      const errorMessage = document.getElementById('errorMessage');
+      
+      try {
+        loadingIndicator.style.display = 'block';
+        errorMessage.style.display = 'none';
+        
+        const products = await fetchWithRetry("http://localhost:5000/products");
+        
+        // Clear existing content first
+        ['kurtisCatalog', 'tunicsCatalog', 'topsCatalog'].forEach(id => {
+          document.getElementById(id).innerHTML = '';
+        });
+        
+        // Create and append cards with error handling
+        products.forEach(prod => {
+          try {
+            const card = createCard(prod);
+            const containerId = `${prod.category}sCatalog`; // kurti -> kurtisCatalog
+            if (document.getElementById(containerId)) {
+              document.getElementById(containerId).innerHTML += card;
+            }
+          } catch (err) {
+            console.error(`Error creating card for product ${prod.id}:`, err);
+          }
+        });
+        
+      } catch (err) {
+        console.error("Error loading products:", err);
+        errorMessage.textContent = 'Failed to load products. Please refresh the page or try again later.';
+        errorMessage.style.display = 'block';
+      } finally {
+        loadingIndicator.style.display = 'none';
+      }
+    }
+    
     function createCard(prod) {
-      let imgPath = "images/" + encodeURIComponent(prod.image);
+      if (!prod || !prod.image) return '';
+      
+      const imgPath = `images/${encodeURIComponent(prod.image)}`;
       const waMsg = encodeURIComponent(
         `Hi GS Fashion, I'm interested in this design: ${prod.name}`
       );
-      // Ribbon HTML
-      let ribbonHTML = '';
-      if (!prod.in_stock) {
-        ribbonHTML = `<div class="ribbon">OUT OF STOCK</div>`;
-      }
+      
+      // Handle missing or invalid data
+      const productName = prod.name || 'Unnamed Product';
+      const sizes = prod.sizes || 'Not specified';
+      
+      // Ribbon HTML for out of stock items
+      const ribbonHTML = !prod.in_stock ? '<div class="ribbon">OUT OF STOCK</div>' : '';
+      
       return `
       <div class="product-card">
-        ${ribbonHTML}  <!-- Ribbon add kiya yaha -->
+        ${ribbonHTML}
         <div class="product-img-box">
-          <img src="${imgPath}" alt="${prod.name}" onclick="showModal('${imgPath}')">
+          <img 
+            src="${imgPath}" 
+            alt="${productName}" 
+            onerror="this.onerror=null; this.src='images/placeholder.svg'; this.alt='Image not available'"
+            onclick="showModal('${imgPath}')"
+            loading="lazy"
+          >
         </div>
-        <div class="product-name">${prod.name}</div>
-        <div class="product-size">Sizes: ${prod.sizes}</div>
+        <div class="product-name">${productName}</div>
+        <div class="product-size">Sizes: ${sizes}</div>
         <div class="product-actions">
-          <a class="whatsapp-link" target="_blank"
-            href="https://wa.me/${WA_NUMBER}?text=${waMsg}">WhatsApp Inquiry</a>
+          <a class="whatsapp-link" target="_blank" 
+            href="https://wa.me/${WA_NUMBER}?text=${waMsg}">
+            <i class="fab fa-whatsapp"></i> WhatsApp Inquiry
+          </a>
         </div>
       </div>`;
     }
-
     //  Modal code
     const modal = document.getElementById("modal");
     const modalImg = document.getElementById("modal-img");
@@ -542,7 +632,6 @@
       }
     });
 
-
   </script>
   <script>
     var swiper = new Swiper(".mySwiper", {
@@ -571,5 +660,3 @@
   </script>
 </body>
 </html>
-
-
