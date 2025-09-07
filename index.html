@@ -1,33 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GS Fashion</title>
 
-
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css" />
-
 
   <style>
     html {
       scroll-behavior: smooth;
       /*  smooth animation enable */
     }
-
     section,
     div[id] {
       scroll-margin-top: 80px;
     }
-
     :root {
       --primary: #b394d6;
       --light: #fdfdfd;
       --dark: #a66cff;
       --text: #3a264e;
     }
-
     body {
       background: var(--light);
       color: var(--text);
@@ -36,7 +30,6 @@
       padding: 0;
       min-height: 100vh;
     }
-
     /*  Contact Bar */
     .contact-bar {
       background: var(--dark);
@@ -45,18 +38,15 @@
       text-align: center;
       font-size: 0.9rem;
     }
-
     .contact-bar a {
       color: #fff;
       text-decoration: none;
       margin: 0 0.4rem;
       font-weight: 600;
     }
-
     .contact-bar a:hover {
       text-decoration: underline;
     }
-
     /* Out of Stock Ribbon */
     .ribbon {
       width: 100px;
@@ -74,7 +64,6 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
       z-index: 10;
     }
-
     nav {
       display: flex;
       justify-content: space-between;
@@ -87,14 +76,12 @@
       z-index: 99;
       flex-wrap: wrap;
     }
-
     nav .logo img {
       height: 60px;
       max-height: none;
       width: auto;
       display: block;
     }
-
     nav ul {
       display: flex;
       gap: 1.2rem;
@@ -103,18 +90,15 @@
       padding: 0;
       flex-wrap: wrap;
     }
-
     nav ul li a {
       color: var(--text);
       text-decoration: none;
       font-weight: 600;
       font-size: 1rem;
     }
-
     nav ul li a:hover {
       color: var(--dark);
     }
-
     .whatsapp-btn {
       background: #58ac77;
       color: #fff;
@@ -128,26 +112,21 @@
       transition: background 0.2s;
       margin-top: 0.5rem;
     }
-
     .whatsapp-btn:hover {
       background: #128c7e;
     }
-
     header {
       background: transparent;
       padding: 0;
     }
-
     header h1 {
       font-size: 2rem;
       font-weight: bold;
     }
-
     header p {
       font-size: 1rem;
       margin-top: 0.6rem;
     }
-
     .section-title {
       text-align: center;
       color: var(--dark);
@@ -155,7 +134,6 @@
       font-size: 1.5rem;
       letter-spacing: 1px;
     }
-
     .product-catalog {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -164,7 +142,6 @@
       margin: 0 auto;
       padding: 1.5rem 4vw;
     }
-
     .product-card {
       background: #fff;
       border-radius: 14px;
@@ -176,12 +153,10 @@
       transition: transform 0.16s, box-shadow 0.2s;
       position: relative;
     }
-
     .product-card:hover {
       transform: translateY(-6px) scale(1.02);
       box-shadow: 0 10px 22px #c792e2bd;
     }
-
     .product-img-box {
       width: 100%;
       display: flex;
@@ -189,7 +164,6 @@
       align-items: center;
       margin-bottom: 0.8rem;
     }
-
     .product-img-box img {
       width: 100%;
       max-width: 160px;
@@ -200,11 +174,9 @@
       cursor: pointer;
       transition: box-shadow 0.15s;
     }
-
     .product-img-box img:hover {
       box-shadow: 0 8px 18px #d0c0eb78;
     }
-
     .product-name {
       font-size: 0.9rem;
       font-weight: 700;
@@ -213,14 +185,12 @@
       text-align: center;
       word-break: break-word;
     }
-
     .product-actions {
       width: 100%;
       display: flex;
       justify-content: center;
       margin-top: 0.5rem;
     }
-
     .whatsapp-link {
       background: #25d366;
       color: #fff;
@@ -233,11 +203,9 @@
       box-shadow: 0 2px 8px #ebd7fd44;
       transition: background 0.17s;
     }
-
     .whatsapp-link:hover {
       background: #128c7e;
     }
-
     footer {
       text-align: center;
       color: #765799;
@@ -246,7 +214,6 @@
       font-size: 0.9rem;
       margin-top: 2rem;
     }
-
     /* Modal Background */
     .modal {
       display: none;
@@ -263,7 +230,6 @@
       align-items: center;
       z-index: 2000;
     }
-
     /* Modal Image */
     .modal img {
       max-width: 90vw;
@@ -272,7 +238,6 @@
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
       animation: zoomIn 0.3s ease;
     }
-
     /* Close Button */
     .modal-close {
       position: absolute;
@@ -291,7 +256,6 @@
       border: 2px solid #d5aaff;
       box-shadow: 0 2px 14px #cdd3fd99;
     }
-
     /*  Swiper Container */
     .swiper {
       width: 100%;
@@ -299,9 +263,7 @@
       /* adjust as per need */
       background: white;
     }
-
     /*  Swiper Slide Images */
-
     .swiper-slide {
       position: relative;
       display: flex;
@@ -309,7 +271,6 @@
       align-items: center;
       overflow: hidden;
     }
-
     /* Background me blur image */
     .swiper-slide::before {
       content: none;
@@ -326,7 +287,6 @@
       opacity: 0.6;
       /* thoda transparent effect */
     }
-
     /* Foreground image (main image) */
     .swiper-slide img {
       position: relative;
@@ -335,12 +295,10 @@
       max-height: 100%;
       object-fit: contain;
     }
-
     .section-title {
       border-top: 2px solid #eee;
       padding-top: 1.5rem;
     }
-
     /* PURPLE PRELOADER WITH CENTER LOGO */
     #preloader {
       position: fixed;
@@ -355,12 +313,10 @@
       z-index: 99999;
       transition: opacity 0.5s, visibility 0.5s;
     }
-
     #preloader img {
       width: 200px;
       animation: pulse 1.2s infinite;
     }
-
     .spinner {
       border: 6px solid #eee;
       border-top: 6px solid #a66cff;
@@ -370,60 +326,47 @@
       height: 60px;
       animation: spin 1s linear infinite;
     }
-
     @keyframes spin {
       0% {
         transform: rotate(0deg);
       }
-
       100% {
         transform: rotate(360deg);
       }
     }
-
     /* Animation for sliding */
     @keyframes slide {
       0% {
         transform: translateX(0%);
       }
-
       20% {
         transform: translateX(0%);
       }
-
       25% {
         transform: translateX(-100%);
       }
-
       40% {
         transform: translateX(-100%);
       }
-
       45% {
         transform: translateX(-200%);
       }
-
       60% {
         transform: translateX(-200%);
       }
-
       65% {
         transform: translateX(-300%);
       }
-
       80% {
         transform: translateX(-300%);
       }
-
       85% {
         transform: translateX(-400%);
       }
-
       100% {
         transform: translateX(-400%);
       }
     }
-
 
     /* Animation */
     @keyframes zoomIn {
@@ -431,7 +374,6 @@
         transform: scale(0.8);
         opacity: 0;
       }
-
       to {
         transform: scale(1);
         opacity: 1;
@@ -439,14 +381,11 @@
     }
   </style>
 </head>
-
 <body>
   <!--  Purple GS logo preloader -->
   <div id="preloader">
-
     <img src="images/gslogo.jpg" alt="GS Fashion Logo">
   </div>
-
   <!--  Contact Info Top -->
   <div class="contact-bar">
     <a href="https://wa.me/918140224241" target="_blank">+91 81402 24241</a> |
@@ -455,7 +394,6 @@
     <a href="https://chat.whatsapp.com/FRUfXhRFdEm7whAFDJGyut?mode=ems_copy_c" target="_blank">WhatsApp Group</a> |
     <a href="https://www.youtube.com/@GSFASHION-h5x" target="_blank">YouTube</a>
   </div>
-
   <!--  Navbar -->
   <nav>
     <div class="logo">
@@ -466,13 +404,10 @@
       <li><a href="#tunics">Tunics</a></li>
       <li><a href="#tops">Tops</a></li>
       <li><a href="contact.html">Contact</a></li>
-
     </ul>
-
   </nav>
   <!-- Swiper JS -->
   <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
-
   <!-- 🔹 Header -->
   <header>
     <!--  Welcome & Address Section -->
@@ -487,81 +422,63 @@
         <div class="swiper-slide"><img src="images/poster4.jpg" alt="Poster 4"></div>
         <div class="swiper-slide"><img src="images/poster5.jpg" alt="Poster 5"></div>
       </div>
-
       <!-- Navigation arrows -->
       <div class="swiper-button-next poster-next"></div>
       <div class="swiper-button-prev poster-prev"></div>
-
       <!-- Pagination -->
       <div class="swiper-pagination"></div>
     </div>
 
-
   </header>
-
   <!--  Product Sections -->
   <div id="kurtis">
     <div class="section-title">Kurtis Collection</div>
     <div class="product-catalog" id="kurtisCatalog"></div>
   </div>
-
   <div id="tunics">
     <div class="section-title">Tunics Collection</div>
     <div class="product-catalog" id="tunicsCatalog"></div>
   </div>
-
   <div id="tops">
     <div class="section-title">Tops Collection</div>
     <div class="product-catalog" id="topsCatalog"></div>
   </div>
-
   <!--  Modal -->
   <div class="modal" id="modal">
     <img id="modal-img" src="#" alt="Product Image" />
     <div class="modal-close" id="modal-close">&times;</div>
   </div>
 
-
-
-
+  </section>
   <footer>&copy; 2025 GS Fashion. All rights reserved.</footer>
   <script>
     const WA_NUMBER = "918140224241";
-
     // API products fetch
     async function loadCatalog() {
       try {
-        const res = await fetch("http://192.168.1.11:5000/products");
-
+        const res = await fetch("http://localhost:5000/products");
         const products = await res.json();
-
       
         document.getElementById('kurtisCatalog').innerHTML =
           products.filter(p => p.category === "kurti").map(createCard).join('');
-
         document.getElementById('tunicsCatalog').innerHTML =
           products.filter(p => p.category === "tunic").map(createCard).join('');
-
         document.getElementById('topsCatalog').innerHTML =
           products.filter(p => p.category === "top").map(createCard).join('');
       } catch (err) {
         console.error("Error loading products:", err);
       }
     }
-
     function createCard(prod) {
-     let imgPath = "/images/" + encodeURIComponent(prod.image);
-
+      let imgPath = "images/" + encodeURIComponent(prod.image);
       const waMsg = encodeURIComponent(
         `Hi GS Fashion, I'm interested in this design: ${prod.name}`
       );
-
       // Ribbon HTML
       let ribbonHTML = '';
       if (!prod.in_stock) {
         ribbonHTML = `<div class="ribbon">OUT OF STOCK</div>`;
       }
-
       return `
       <div class="product-card">
         ${ribbonHTML}  <!-- Ribbon add kiya yaha -->
@@ -577,23 +494,19 @@
       </div>`;
     }
 
-
     //  Modal code
     const modal = document.getElementById("modal");
     const modalImg = document.getElementById("modal-img");
     const modalClose = document.getElementById("modal-close");
-
     function showModal(imgSrc) {
       modal.style.display = "flex";  // show modal
       modalImg.src = imgSrc;         // set image
     }
-
     // Close on "X"
     modalClose.addEventListener("click", () => {
       modal.style.display = "none";
       modalImg.src = "";
     });
-
     // Close on background click
     modal.addEventListener("click", (e) => {
       if (e.target === modal) {
@@ -601,17 +514,14 @@
         modalImg.src = "";
       }
     });
-
     document.addEventListener("DOMContentLoaded", loadCatalog);
   </script>
   <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
   <script>
     window.addEventListener("load", function () {
       const pre = document.getElementById("preloader");
-
       // Check karo kya pehle se session me preloader show ho chuka hai
       const firstVisit = sessionStorage.getItem("firstVisitDone");
-
       if (!firstVisit) {
         // Pehli baar page load ho raha hai: 5 second tak preloader chalao
         setTimeout(() => {
@@ -633,9 +543,7 @@
     });
 
 
-
   </script>
-
   <script>
     var swiper = new Swiper(".mySwiper", {
       loop: true,
@@ -656,14 +564,12 @@
       const offlineMsg = document.getElementById("offline-message");
       if (offlineMsg) offlineMsg.style.display = "flex";
     });
-
     window.addEventListener("online", function () {
       const offlineMsg = document.getElementById("offline-message");
       if (offlineMsg) offlineMsg.style.display = "none";
     });
-
   </script>
-
 </body>
-
 </html>
+
+
