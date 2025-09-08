@@ -3,15 +3,12 @@ const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
 const path = require("path");
+const db = require('./config/database');
 const app = express();
-// Configure CORS
-const corsOptions = {
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-};
-app.use(cors(corsOptions));
+// Configure CORS to allow access from all devices
+app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 // Static files serve (CSS, JS, etc.)
 app.use(express.static(path.join(__dirname, "..")));
 // Serve images from root images folder
@@ -20,21 +17,23 @@ app.use('/images', express.static(path.join(__dirname, '..', 'images')));
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../index.html"));
 });
-// MySQL connection
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "miramysql@2006",
-  database: "gs_fashion"
-});
-// Check connection
+// Initialize database connection
 db.connect(err => {
   if (err) {
-    console.error(" MySQL connection error:", err);
+    console.error("Database connection error:", err);
     return;
   }
-  console.log(" Connected to MySQL Database!");
+  console.log("MySQL connected successfully");
 });
+// Test routes
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API is working!' });
+});
+
+app.get('/test', (req, res) => {
+  res.json({ message: 'API is working!' });
+});
+
 // ROUTES
 app.get("/products", (req, res) => {
   db.query("SELECT * FROM products", (err, results) => {
@@ -85,6 +84,9 @@ app.delete("/products/:id", (req, res) => {
   });
 });
 //START SERVER 
-app.listen(5000, "0.0.0.0", () => {
-  console.log("🚀 Server running on http://192.168.1.3:5000");
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌐 Access from local network: http://0.0.0.0:${PORT}`);
+  console.log(`💻 Access from localhost: http://localhost:${PORT}`);
 });

@@ -219,6 +219,53 @@
       background-color: rgba(111, 66, 193, 0.03);
     }
     
+    /* Image Preview Styles */
+    .image-preview-container {
+      min-height: 100px;
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      padding: 10px;
+    }
+    
+    .image-preview-item {
+      position: relative;
+      width: 80px;
+      height: 100px;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid #dee2e6;
+    }
+    
+    .image-preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .image-preview-item .remove-image {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      border: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    
+    .product-image-thumbnail {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    
     /* Badges */
     .badge {
       font-weight: 500;
@@ -604,9 +651,14 @@
               </div>
               <div class="col-md-6">
                 <div class="mb-3">
-                  <label class="form-label">Product Image</label>
-                  <input type="file" class="form-control" name="image" accept="image/*">
-                  <small class="text-muted">Upload a high-quality image (800x1000px recommended)</small>
+                  <label class="form-label">Product Images</label>
+                  <input type="file" class="form-control" name="images" accept="image/*" multiple>
+                  <small class="text-muted">Upload high-quality images (800x1000px recommended). You can select multiple images.</small>
+                  
+                  <!-- Image Preview Container -->
+                  <div class="image-preview-container mt-3 d-flex flex-wrap gap-2" id="imagePreviewContainer">
+                    <!-- Preview images will be added here -->
+                  </div>
                 </div>
                 <div class="mb-3">
                   <label class="form-label">Available Sizes</label>
@@ -735,14 +787,10 @@
                 <img src="http://192.168.1.5:5000/images/${product.image || 'placeholder.svg'}" alt="${product.name}" class="product-img me-3" onerror="this.src='http://192.168.1.5:5000/images/placeholder.svg'">
                 <div>
                   <div class="fw-bold">${product.name}</div>
-                  <small class="text-muted">ID: ${product.id}</small>
-                </div>
               </div>
             </td>
-            <td>
-              <span class="badge bg-light text-dark text-capitalize">${product.category}</span>
-            </td>
-            <td>₹${parseFloat(product.price || 0).toFixed(2)}</td>
+            <td>${product.category}</td>
+            <td>₹${product.price}</td>
             <td>
               ${product.in_stock 
                 ? '<span class="badge bg-success">In Stock</span>' 
@@ -1012,8 +1060,57 @@
       }
     };
     
+    // Handle image previews
+    function handleImagePreview(input, containerId) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = ''; // Clear previous previews
+      
+      if (input.files && input.files.length > 0) {
+        Array.from(input.files).forEach((file, index) => {
+          if (!file.type.startsWith('image/')) return;
+          
+          const reader = new FileReader();
+          const previewItem = document.createElement('div');
+          previewItem.className = 'image-preview-item';
+          
+          reader.onload = function(e) {
+            previewItem.innerHTML = `
+              <img src="${e.target.result}" alt="Preview ${index + 1}">
+              <button type="button" class="remove-image" data-index="${index}">&times;</button>
+            `;
+          };
+          
+          reader.readAsDataURL(file);
+          container.appendChild(previewItem);
+        });
+        
+        // Add event listener for remove buttons
+        container.querySelectorAll('.remove-image').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const index = parseInt(this.getAttribute('data-index'));
+            const dt = new DataTransfer();
+            const { files } = input;
+            
+            for (let i = 0; i < files.length; i++) {
+              if (index !== i) dt.items.add(files[i]);
+            }
+            
+            input.files = dt.files;
+            this.closest('.image-preview-item').remove();
+          });
+        });
+      }
+    }
+    
     // Initialize the admin panel when the DOM is loaded
     document.addEventListener('DOMContentLoaded', () => {
+      // Set up image preview for file inputs
+      document.addEventListener('change', (e) => {
+        if (e.target.matches('input[type="file"][name="images"]')) {
+          handleImagePreview(e.target, 'imagePreviewContainer');
+        }
+      });
+      
       adminPanel.init();
     });
   </script>
