@@ -85,6 +85,6 @@ app.delete("/products/:id", (req, res) => {
   });
 });
 //START SERVER 
-app.listen(5000, () => {
-  console.log("🚀 Server running on http://localhost:5000");
+app.listen(5000, "0.0.0.0", () => {
+  console.log("🚀 Server running on http://192.168.1.3:5000");
 });

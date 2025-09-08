@@ -732,7 +732,7 @@
             <td>${index + 1}</td>
             <td>
               <div class="d-flex align-items-center">
-                <img src="images/${product.image || 'placeholder.svg'}" alt="${product.name}" class="product-img me-3" onerror="this.src='images/placeholder.svg'">
+                <img src="http://192.168.1.5:5000/images/${product.image || 'placeholder.svg'}" alt="${product.name}" class="product-img me-3" onerror="this.src='http://192.168.1.5:5000/images/placeholder.svg'">
                 <div>
                   <div class="fw-bold">${product.name}</div>
                   <small class="text-muted">ID: ${product.id}</small>

@@ -41,7 +41,6 @@
       display: none;
     }
     
-    
     .product-img-box {
       position: relative;
       min-height: 200px;
@@ -61,11 +60,6 @@
       opacity: 0.6;
     }
     
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
     
     /*  Contact Bar */
     .contact-bar {
@@ -481,12 +475,6 @@
     </div>
   </section>
   
-  <!-- Loading and Error States -->
-  <div id="loadingIndicator">
-    <div class="loading-spinner"></div>
-    <p>Loading products...</p>
-  </div>
-  
   <div id="errorMessage"></div>
   <!--  Modal -->
   <div class="modal" id="modal">
@@ -511,11 +499,9 @@
       }
     }
     async function loadCatalog() {
-      const loadingIndicator = document.getElementById('loadingIndicator');
       const errorMessage = document.getElementById('errorMessage');
       
       try {
-        loadingIndicator.style.display = 'block';
         errorMessage.style.display = 'none';
         
         const products = await fetchWithRetry("http://localhost:5000/products");
@@ -542,8 +528,6 @@
         console.error("Error loading products:", err);
         errorMessage.textContent = 'Failed to load products. Please refresh the page or try again later.';
         errorMessage.style.display = 'block';
-      } finally {
-        loadingIndicator.style.display = 'none';
       }
     }
     

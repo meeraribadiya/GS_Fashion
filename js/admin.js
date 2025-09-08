@@ -1,5 +1,6 @@
 
 // Simple Admin Panel for GS Fashion
+const BASE_URL = 'http://192.168.1.5:5000';
 const adminPanel = {
   products: [],
   currentProduct: null,
@@ -13,7 +14,7 @@ const adminPanel = {
   // Load products from the server
   loadProducts: async function() {
     try {
-      const response = await fetch('http://localhost:5000/products');
+      const response = await fetch(`${BASE_URL}/products`);
       this.products = await response.json();
       this.renderProductList();
       this.updateStats();
