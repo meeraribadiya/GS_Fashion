@@ -71,11 +71,11 @@ img {
     margin-bottom: 20px;
 }
 
-/* Reveal-on-scroll animation */
+/* Reveal-on-scroll animation - visible by default to avoid blank flashes */
 .reveal {
-    opacity: 0;
-    transform: translateY(18px);
-    transition: opacity 600ms ease, transform 600ms ease;
+    opacity: 1; /* keep visible to prevent blank on slow loads */
+    transform: translateY(0);
+    transition: transform 600ms ease;
 }
 
 .reveal.in-view {
@@ -538,8 +538,78 @@ img {
     background: var(--primary-color);
     color: var(--white);
     text-align: center;
-    padding: 20px 0;
+    padding: 20px 0 0; /* remove bottom padding so bottom bar touches edge */
     margin-top: 50px;
+}
+
+.footer-top {
+    padding: 50px 0 20px 0;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 30px;
+    text-align: left;
+    align-items: start;
+}
+
+.footer-logo {
+    height: 60px;
+    object-fit: contain;
+    margin-bottom: 12px;
+}
+
+.footer-brand p {
+    opacity: 0.9;
+}
+
+.footer-links h4,
+.footer-contact h4 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+.footer-links ul {
+    display: grid;
+    gap: 8px;
+}
+
+.footer a { color: #fff; }
+.footer a:hover { color: var(--accent-color); }
+
+.footer-contact p { display: flex; gap: 10px; align-items: flex-start; }
+.footer-contact i { color: var(--accent-color); margin-top: 3px; }
+
+.footer-socials { display: flex; gap: 12px; margin-top: 10px; }
+.footer-socials a { font-size: 1.2rem; transition: transform .2s ease; }
+.footer-socials a:hover { transform: translateY(-2px); color: var(--accent-color); }
+
+.footer-bottom {
+    background: rgba(0,0,0,0.15);
+    margin-top: 20px;
+    padding: 10px 0; /* slightly tighter so it sits closer to the bottom */
+    text-align: center;
+}
+
+.footer-bottom p { margin: 0; opacity: 0.95; font-size: 0.95rem; }
+
+@media (max-width: 768px) {
+    .footer { text-align: left; }
+}
+
+/* Small screen footer tweaks */
+@media (max-width: 540px) {
+    .footer-top { padding: 30px 0 10px 0; }
+    .footer-grid { gap: 18px; }
+    .footer-logo { height: 48px; }
+    .footer-links h4, .footer-contact h4 { font-size: 1rem; margin-bottom: 8px; }
+    .footer-links ul { gap: 6px; }
+    .footer-contact p { font-size: 0.95rem; line-height: 1.5; }
+    .footer-socials a { font-size: 1.1rem; }
+    .footer-bottom { padding: 8px 0; }
+    .footer-bottom p { font-size: 0.9rem; }
 }
 
 /* Modal */
